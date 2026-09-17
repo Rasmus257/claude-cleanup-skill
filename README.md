@@ -16,6 +16,45 @@ Review comments about an unused import, or about a comment that restates the lin
 
 This one skews conservative. The bar for touching anything is "this materially helps the next reader", not "this is different". "I left it alone because X" is a valid outcome for an entire pass.
 
+Two things pile up specifically in codebases that agents write.
+
+The first is the same function, written five slightly different ways. Each session reached for a fresh implementation instead of finding the one already three directories over. Pass 2 hunts those and collapses them onto a single copy, but only when it can read every version and confirm they are actually the same. If one of them treats an empty list differently, they all stay and you get told about it. Copies that merely look alike are how a cleanup pass changes behavior while your typecheck stays green.
+
+The second is comments written for the next agent. "NOTE for whoever picks this up", a paragraph re-explaining the function directly below it, a pointer to a similar helper elsewhere. The instinct is good and the result is a codebase where a third of what you load is narration. Pass 4 cuts the ones that narrate and keeps the ones carrying a constraint the code cannot show.
+
+## Before and after
+
+One file, after all four passes:
+
+```diff
+- import { readFileSync } from 'node:fs';
+  import './telemetry.js';
+  import { formatCurrency } from '../shared/money.js';
+
+- // Formats cents as a dollar string.
+- // NOTE for whoever picks this up: there is a similar helper in
+- // shared/money.ts, but this one is local to the cart so they may drift.
+- function formatPrice(cents: number): string {
+-   return `$${(cents / 100).toFixed(2)}`;
+- }
+-
+  export function cartTotal(items: Item[]): string {
+-   // Sum the item prices
+    let sum = 0;
+    for (const item of items) sum += item.cents;
+-   return formatPrice(sum);
++   return formatCurrency(sum);
+  }
+-
+- function legacyCartLabel(items: Item[]): string {
+-   return `${items.length} items`;
+- }
+```
+
+Pass 1 dropped the unused `readFileSync` and the unreferenced `legacyCartLabel`, and left `import './telemetry.js'` alone because a bare side-effect import has zero references by design. Pass 2 read both `formatPrice` and the existing `formatCurrency`, confirmed they were identical, and pointed the call at the one the repo already exports. Pass 4 removed the comment explaining what the function below it did, and the note warning about the duplication that no longer exists.
+
+Twenty-one lines to eight, and nothing behaves differently.
+
 ## Install
 
 ```sh

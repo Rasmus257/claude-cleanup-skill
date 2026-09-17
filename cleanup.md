@@ -87,13 +87,19 @@ Leave: public API surface, documented caller-parity params, anything imported by
 
 Replace with what already exists: duplication a shared util in this repo already covers, boilerplate the language or framework provides, accidental O(n²) where O(n) is one line away, verbose guards a single optional chain or default covers, type narrowing the control flow already implies.
 
-- ❌ Extracting a new helper because three call sites share five lines.
+**Consolidating repeated implementations.** Agent-written code accumulates the same function written five slightly different ways, because each session rewrote it instead of finding the one already there. Collapsing those is worth doing, and it is the only case where this pass may introduce a function.
+
+The bar is semantic identity, not similar shape. Read every copy in full before touching any of them. If one handles an empty input, an error, a default, a rounding mode or a type differently from the others, leave all of them and report it. Consolidating copies that merely look alike is precisely how a cleanup pass changes behavior while the typecheck stays green. Prefer an implementation the repo already has over a new one, and put a genuinely new survivor where this repo already keeps shared code, never in a `utils` file invented for the occasion.
+
+- ❌ Extracting a new helper because three call sites in one feature share five lines.
+- ❌ Consolidating four copies that differ in how they treat an empty list.
 - ❌ Collapsing an if/else chain into nested ternaries. Shorter, harder to read.
 - ❌ Replacing a sequential await loop with a parallel primitive. Concurrency is a behavior change: rate limits, pool pressure, and what has already happened when one item throws all differ. Report it as a possible speedup instead.
 - ✅ Replacing a hand-rolled dedup loop with the language's set type.
 - ✅ Replacing a nested-loop membership test with a set lookup.
+- ✅ Collapsing five byte-identical `formatCurrency` copies onto the one the repo already exports.
 
-Hard rule: **no new abstractions.** Extraction earns its keep only when the duplication is a genuine hotspot, the right abstraction is obvious, and every call site benefits. Three similar lines beat a premature abstraction.
+Hard rule: **no speculative abstractions.** No interface with one implementation, no factory for one product, no config for a value nothing sets. Consolidating code that is already repeated is a different thing from inventing a layer for code that is not.
 
 ### Pass 3: Extraction
 
@@ -111,6 +117,8 @@ Default position: **do not extract.** The bar is "the next reader holds this fil
 ### Pass 4: Comments
 
 Remove comments restating what the code says, ticket and PR references that rot, pointers to code that no longer exists, resolved TODOs, and doc comments echoed again in the body.
+
+Include the notes agents leave for each other. Orientation comments ("NOTE for whoever picks this up", "this mirrors the helper in checkout.ts", a paragraph re-explaining what the function below does) are written in good faith, but they are context load for every future reader, human and model alike, and they rot faster than the code. Keep the ones carrying a constraint the code cannot show. Cut the ones narrating it.
 
 - ❌ Removing `// 5000ms, from the observed p99`. That is a cited magic number.
 - ❌ Removing `// the API returns 200 with an error body here`. That is an external contract.
