@@ -1,4 +1,4 @@
-# cleanup
+# claude-cleanup-skill
 
 A Claude Code command that tidies the diff on your current branch — and only the diff on your current branch.
 
@@ -20,16 +20,16 @@ One file, no plugin, no dependencies:
 
 ```sh
 curl -o ~/.claude/commands/cleanup.md \
-  https://raw.githubusercontent.com/Rasmus257/cleanup/main/cleanup.md
+  https://raw.githubusercontent.com/Rasmus257/claude-cleanup-skill/main/cleanup.md
 ```
 
-Then `/cleanup` in any repo. Drop it in `.claude/commands/` inside a project instead if you'd rather scope it to one repo, or commit it there to share it with your team.
+Then `/cleanup` in any repo. Note the path is `commands/`, not `skills/` — this is a slash command, which Claude Code registers as a skill. Drop it in `.claude/commands/` inside a project instead if you'd rather scope it to one repo, or commit it there to share it with your team.
 
 It deletes code, so read [`cleanup.md`](cleanup.md) before you run it. That's the whole tool — one file, one screen at a time.
 
 ## The four passes
 
-Passes run in order, not in parallel: dead code first so later passes don't polish code that's about to be deleted, comments last so they describe the final shape. Between each pass it runs your project's own typecheck or lint against the touched files, and stops the run if the tree broke.
+Passes run in order, not in parallel: dead code first so later passes don't polish code that's about to be deleted, comments last so they describe the final shape. Between each pass it runs your project's own typecheck or lint — project-wide, not scoped to the touched files, because a file-scoped `tsc` reports every path alias as a missing module and can't see breakage in a file that imports what a pass moved. It stops the run if the tree broke.
 
 | Pass | Removes | Leaves |
 | --- | --- | --- |
