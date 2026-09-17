@@ -2,7 +2,7 @@
 
 A Claude Code command that tidies the diff on your current branch — and only the diff on your current branch.
 
-Four conservative passes, each a fresh subagent: **dead code**, **simplification**, **extraction**, **comments**. It stops after the report and waits for you to review. It never commits, and it never changes behavior.
+Four conservative passes, each a fresh subagent: **dead code**, **simplification**, **extraction**, **comments**. It stops after the report and waits for you to review the diff.
 
 ```
 /cleanup
@@ -52,15 +52,23 @@ Carved out either way: lockfiles, generated and build output, vendored code, fix
 
 ## What it won't do
 
-- Change behavior. Every code path, response shape, error message, log line and effect order stays identical.
+- Add abstractions, or add comments. Pass 2 is explicitly barred from extracting a helper, and pass 4 may only edit comments that already exist.
 - Fix bugs it finds. It reports them with `file:line` and moves on — a fix hiding in a cleanup diff is a fix nobody reviewed.
-- Add dependencies, abstractions, or comments.
-- Commit, push, or open anything. You review the diff.
-- Keep going on a broken tree.
+- Reformat. No `--write` pass over a file; whole-file reformatting destroys the reviewability this exists to produce.
+- Touch files outside the diff, or the carved-out ones.
+- Keep going on a broken tree. It runs your check before pass 1 too, so a pre-existing failure doesn't get blamed on a pass.
+
+## About "no behavior changes"
+
+Every pass is told that behavior must stay identical, and the ❌ examples exist to block the changes that look safe and aren't — deleting a side-effect import, turning a sequential loop parallel, dropping a branch that's only reached reflectively.
+
+But these are model edits gated by your typecheck, not a proof. A typecheck cannot see a removed log line, a changed concurrency pattern, or a deleted import that existed purely for its side effect. Treat it as a tool that skews hard toward leaving things alone, and review the diff.
+
+If your working tree is dirty when you start, it says so and stops. Nothing here commits, so uncommitted work it edits has no restore point — commit or stash first.
 
 ## Requirements
 
-Claude Code, and a git repo with a remote. That's it.
+Claude Code and a git repo. If the default branch can't be resolved it asks rather than guessing.
 
 ## License
 
