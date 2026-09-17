@@ -33,7 +33,7 @@ Passes run in order, not in parallel: dead code first so later passes don't poli
 
 | Pass | Removes | Leaves |
 | --- | --- | --- |
-| **1. Dead code** | Unreferenced functions, imports, props, type fields; unreachable branches; resolved TODOs; comments describing deleted code | Anything reached reflectively or by name, public API surface, documented caller-parity params |
+| **1. Dead code** | Unreferenced functions, imports, props, type fields; unreachable branches; vestigial naming left by a migration | Bare side-effect imports, anything reached reflectively or by name, public API surface, documented caller-parity params |
 | **2. Simplification** | Inline duplication where a shared util already exists, hand-rolled stdlib, accidental O(n²), verbose guards | Three similar lines. No new abstractions, ever |
 | **3. Extraction** | Splits a file only when several cohesive groups are sharing it, following the repo's existing conventions | Everything else. The default position is "do not extract" |
 | **4. Comments** | Comments restating the code, rotting ticket references, pointers to deleted code, stale TODOs | Every WHY comment, external-system quirks, tradeoff notes, magic-number citations. It adds no new comments |
@@ -42,13 +42,15 @@ Before deleting any symbol, a pass greps the whole repository for it — includi
 
 ## Scope
 
-`/cleanup` works on `git diff <default-branch>...HEAD` plus your uncommitted changes. Pass paths to scope it yourself:
+`/cleanup` works on `git diff origin/<default-branch>...HEAD`. It resolves the base through `origin/HEAD` → `origin/main` → `origin/master` → local `main`/`master`, and asks rather than guessing if none resolve — a failed lookup is never treated as an empty diff.
+
+Pass paths to scope it yourself:
 
 ```
 /cleanup src/api src/lib/auth.ts
 ```
 
-Carved out either way: lockfiles, generated and build output, vendored code, fixtures, templates and seeds, migrations, and anything marked `WIP` or `DO NOT COMMIT`.
+Carved out either way: lockfiles, generated and build output, vendored code, fixtures, templates and seeds, migrations, prose (`*.md`, `*.txt`) unless you pass them explicitly, and anything marked `WIP` or `DO NOT COMMIT`.
 
 ## What it won't do
 
