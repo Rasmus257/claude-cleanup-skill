@@ -1,0 +1,13 @@
+{
+  "name": "cleanup",
+  "version": "1.0.0",
+  "description": "Tidy the diff on your current branch in four conservative passes: dead code, simplification, extraction, comments. No behavior changes.",
+  "author": {
+    "name": "Rasmus Nyblom",
+    "url": "https://github.com/Rasmus257"
+  },
+  "homepage": "https://github.com/Rasmus257/cleanup",
+  "repository": "https://github.com/Rasmus257/cleanup",
+  "license": "MIT",
+  "keywords": ["cleanup", "refactor", "dead-code", "code-review", "diff"]
+}

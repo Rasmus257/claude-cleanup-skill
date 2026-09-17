@@ -1,0 +1,14 @@
+{
+  "name": "cleanup",
+  "owner": {
+    "name": "Rasmus Nyblom",
+    "url": "https://github.com/Rasmus257"
+  },
+  "plugins": [
+    {
+      "name": "cleanup",
+      "source": "./",
+      "description": "Tidy the diff on your current branch in four conservative passes. No behavior changes."
+    }
+  ]
+}
