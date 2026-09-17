@@ -1,7 +1,7 @@
 ---
 description: Multi-pass cleanup of the whole current-branch diff (dead code, simplification, extraction, comments) via four sequential subagents. Only when the user explicitly asks to clean up or tidy a branch or PR, not to tidy a single file they're editing.
 argument-hint: "[paths, or what you want cleaned up]"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 Tidy the code introduced on the current branch through four sequential subagent passes: **dead code**, **simplification**, **extraction**, **comments**.
