@@ -85,7 +85,7 @@ Dead code runs first so later passes don't polish code that is about to be delet
 | Pass | Removes | Leaves |
 | --- | --- | --- |
 | 1. Dead code | Unreferenced functions, imports, props, type fields; unreachable branches; vestigial naming left by a migration | Bare side-effect imports, anything reached reflectively or by name, public API surface, documented caller-parity params |
-| 2. Simplification | Duplication a shared util already covers, hand-rolled stdlib, accidental O(n²), verbose guards | Three similar lines. No new abstractions, ever |
+| 2. Simplification | Repeated copies of the same function, duplication a shared util already covers, hand-rolled stdlib, accidental O(n²), verbose guards | Three similar lines inside one feature. Copies that differ in any edge case. Speculative abstractions, always |
 | 3. Extraction | Splits a file only when several cohesive groups share it, following the repo's existing layout | Everything else. The default position is "do not extract" |
 | 4. Comments | Comments restating the code, rotting ticket references, pointers to deleted code, resolved TODOs | Every WHY comment, external-system quirks, tradeoff notes, magic-number citations. It adds no new comments |
 
@@ -95,7 +95,8 @@ Between passes it runs your project's own typecheck or lint. Project-wide, not s
 
 ## What it won't do
 
-- Add abstractions or comments. Pass 2 is barred from extracting a helper, and pass 4 may only edit comments that already exist.
+- Invent abstractions. No interface with one implementation, no factory for one product, no config for a value nothing sets. Collapsing copies that already exist is a different thing, and pass 2 does that.
+- Add comments. Pass 4 may only edit ones that are already there.
 - Fix bugs it finds. It reports them with `file:line` and moves on. A fix hiding in a cleanup diff is a fix nobody reviewed.
 - Reformat. No `--write` pass over a file, because whole-file reformatting destroys the reviewability this exists to produce.
 - Touch files outside the diff, or the carved-out ones.
