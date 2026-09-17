@@ -14,7 +14,7 @@ If `git status --porcelain` is non-empty, say so and stop until the user commits
 
 ## 2. Resolve scope
 
-1. **Base ref** — first that resolves under `git rev-parse --verify --quiet`: `origin/HEAD`, `origin/main`, `origin/master`, then local `main`, `master`. Keep the `origin/` prefix: a local `main` is usually behind and would pull other people's merged commits into scope.
+1. **Base ref** — first that resolves under `git rev-parse --verify --quiet`: `origin/HEAD`, `origin/main`, `origin/master`, then local `main`, `master`. Keep the `origin/` prefix. Branching off a freshly fetched `origin/main` while local `main` lags behind makes `main...HEAD` include the commits in between — other people's merged work, fed to four deletion passes.
 2. **Changed files**: `git diff --name-only --diff-filter=d <base>...HEAD`, plus `git status --porcelain -uall`. From the status output, strip the two-character prefix; for a rename (`R  old -> new`) take the path after the arrow; unquote paths git wrapped in `"`. `--diff-filter=d` drops deleted files so no pass is told to edit one, and `-uall` lists untracked files individually instead of naming their directory.
 3. **A failed resolution is not an empty diff.** `git symbolic-ref … | sed` exits 0 with an empty string when the ref is missing, and `git diff ...HEAD` then accepts it and returns nothing — indistinguishable from a clean branch. If no base ref resolves, or the diff fails with `no merge base` or `ambiguous argument`, stop and ask for the base branch.
 4. If the user passed paths — `$ARGUMENTS` — use those instead of the diff. Empty means none were passed. The carve-outs still apply.
